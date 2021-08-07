@@ -37,8 +37,10 @@ def result():
     if request.method == "POST":
         i_c = request.form['ISBN']
         l_c = request.form['LCODE']
+        if (i_c == '')or(l_c == ''):
+            X = 'ISBN이나 도서관 코드가 입력되지 않았습니다.'
 
-        X = prepreprocess(i_c, l_c)
+        X = preprocess(i_c, l_c)
 
         y_pred = lc_predict(X)
         additional_info = add_info(l_c)
@@ -52,7 +54,6 @@ if __name__ == "__main__":
     lib_final = pd.read_csv('lib_final.csv', dtype = {'code' : 'object'})
     lib_final = lib_final.drop(columns=['name', 'dtl_region'])
     lib_perc_d = pd.read_csv('lib_perc_d.csv', dtype = {'code' : 'object'})
-    oa_key = '578ca4ba507631e4a9b621f4029400eac427aaf6071b45611e599387b637b6dc'
     okt = Okt()
     with open('stopwords_title.txt', encoding = 'UTF-8') as f:
         content = f.readlines()
