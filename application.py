@@ -39,11 +39,12 @@ def result():
         l_c = request.form['LCODE']
         if (i_c == '')or(l_c == ''):
             X = 'ISBN이나 도서관 코드가 입력되지 않았습니다.'
-
-        X = preprocess(i_c, l_c)
+            additional_info = ''
+        else:
+            X = preprocess(i_c, l_c)
+            additional_info = add_info(l_c)
 
         y_pred = lc_predict(X)
-        additional_info = add_info(l_c)
 
         return render_template("result.html",result=result)
 
