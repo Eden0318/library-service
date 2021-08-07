@@ -16,26 +16,56 @@ from gensim import models
 from sklearn.model_selection import KFold, train_test_split
 from keras_tuner import BayesianOptimization, HyperModel
 from sklearn.preprocessing import MinMaxScaler
-from tensorflow import keras
-import keras_tuner
-from skopt import BayesSearchCV
 import xgboost as xgb
 import joblib
 import pickle
 
 
 application = Flask(__name__)
-data=["223","1231"]
 
-@application.route("/index")
+@application.route("/index.html")
 def index():
     return render_template("index.html")
 
-#예측
-#form 중 도서관코드를 l_c, isbn을 i_c에 저장해주세요.
-#둘다 문자열로 저장해서 안꼬이게 부탁드립니다.
-@application.route("/search")
+
+@application.route("/search.html")
 def search():
+    return render_template("search.html")
+
+@application.route("/result.html", methods=["POST"])
+def result():
+    if request.method == "POST":
+        i_c = request.form['ISBN']
+        l_c = request.form['LCODE']
+
+        X = prepreprocess(i_c, l_c)
+
+        y_pred = lc_predict(X)
+        additional_info = add_info(l_c)
+
+        return render_template("result.html",result=result)
+
+
+
+
+if __name__ == "__main__":
+    lib_final = pd.read_csv('lib_final.csv', dtype = {'code' : 'object'})
+    lib_final = lib_final.drop(columns=['name', 'dtl_region'])
+    lib_perc_d = pd.read_csv('lib_perc_d.csv', dtype = {'code' : 'object'})
+    oa_key = '578ca4ba507631e4a9b621f4029400eac427aaf6071b45611e599387b637b6dc'
+    okt = Okt()
+    with open('stopwords_title.txt', encoding = 'UTF-8') as f:
+        content = f.readlines()
+    stopword_title = [x.replace('\n','') for x in content]
+    ko_model = models.fasttext.load_facebook_model('cc.ko.300.bin.gz') 
+    scaler = joblib.load('scaler_gt10.gz')
+    a_stopwords = ['지음','지은이','그림','글','저자','집필자','옮긴이','옮김','원작']
+    xgb = joblib.load('xgb_gt10.dat')
+    with open("dummies_c.txt", "rb") as fp:  
+        dummies_c = pickle.load(fp)
+    with open("column_order.txt", "rb") as fp:   
+        column_order = pickle.load(fp)
+
     def preprocess(i_p, c_p):
         if len(i_p) != 13:
             return '잘못된 ISBN입니다. 13자리 ISBN인지 확인해주세요.'
@@ -112,51 +142,14 @@ def search():
     
         return data
 
-    X = prepreprocess(i_c, l_c)
-
     def lc_predict(X):
         if len(X[0]) == 856:
             return f'해당 책의 대출 예상 횟수는 {round((10 ** xgb.predict(X))[0])}번 입니다.'
         else:
             return X
 
-    y_pred = lc_predict(X)
-
     def add_info(lcc):
         return f'{lib_perc_d.loc[lib_perc_d.code == lcc, "name"].item()}에서 6개월간 대출된 책 중 {round(lib_perc_d.loc[lib_perc_d.code == lcc, "percentage"].item(),1)}%가 1회만 대출됐습니다.'
+    
 
-    additional_info = add_info(l_c)
-
-    ''' 
-    y_pred가 예측값 혹은 에러값. ( 해당 책의 대출 예상 횟수는 3번입니다. or 지원하지않는 ISBN입니다. 이런식.)
-    additional_info가 추가정보.( 세종도서관에서 6개월간 대출된 책 중 39%가 1회만 대출됐습니다. )
-    두개다 반환해주시면되용
-    '''
-   
-    return render_template("search.html")
-
-@application.route("/result", methods=["POST","GET"])
-def result():
-    if request.method == "POST":
-        result = request.form
-        return render_template("result.html",result=result)
-
-
-if __name__ == "__main__":
-    lib_final = pd.read_csv('lib_final.csv', dtype = {'code' : 'object'})
-    lib_final = lib_final.drop(columns=['name', 'dtl_region'])
-    lib_perc_d = pd.read_csv('lib_perc_d.csv', dtype = {'code' : 'object'})
-    oa_key = '578ca4ba507631e4a9b621f4029400eac427aaf6071b45611e599387b637b6dc'
-    okt = Okt()
-    with open('stopwords_title.txt', encoding = 'UTF-8') as f:
-        content = f.readlines()
-    stopword_title = [x.replace('\n','') for x in content]
-    #ko_model = models.fasttext.load_facebook_model('cc.ko.300.bin.gz') : 얘가 단어를 임베딩 벡터로바꿔주는애인데 용량이 5기가짜리라서 깃헙에못올림. 애 어쩔지도 생각해야할듯.
-    scaler = joblib.load('scaler_gt10.gz')
-    a_stopwords = ['지음','지은이','그림','글','저자','집필자','옮긴이','옮김','원작']
-    xgb = joblib.load('xgb_gt10.dat')
-    with open("dummies_c.txt", "rb") as fp:  
-        dummies_c = pickle.load(fp)
-    with open("column_order.txt", "rb") as fp:   
-        column_order = pickle.load(fp)
     application.run(host='0.0.0.0')
