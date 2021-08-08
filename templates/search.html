@@ -333,9 +333,9 @@
         </tr>
       </tbody>
     </table>
-    <form id="search-form" action="result.html" method="get" id="login-form">
-      <input type="text" placeholder="isbn 코드" />
-      <input type="password" placeholder="도서관 코드" />
+    <form id="search-form" action="result.html" method="POST" id="login-form">
+      <input type="text" name="ISBN" placeholder="isbn 코드" />
+      <input type="text" name="LCODE" placeholder="도서관 코드" />
       <input type="submit" value="제출" />
     </form>
   </body>
