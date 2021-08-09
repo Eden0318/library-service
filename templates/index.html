@@ -162,7 +162,7 @@
     color: var(--color-white);
     display: none;
   }
-  /* Home */
+
   
   #home {
     background-color: var(--color-pink);
@@ -269,7 +269,35 @@
   .school__major {
     font-size: var(--font-micro);
   }
-  
+
+
+
+
+.contact__title {
+  margin: 32px 0px;
+}
+
+.contact__links {
+  font-size: var(--font-large);
+  margin: 24px 0;
+  transition: all var(--animation-duration) ease-in;
+}
+
+.contact__links i:hover {
+  transform: scale(1.1);
+  color: var(--color-yellow);
+}
+
+#library_icon{
+color:white
+}
+
+footer{
+  color:#7c7979;
+  font-size: 11px;
+}
+
+
   
  
   
@@ -361,13 +389,13 @@
     </style>
   </head>
   <body>
-    <!-- Home -->
+    
     <section id="home">
       <i id="library_icon" class="fas fa-hotel fa-5x"></i>
       <h1 class="home__title">Library Service</h1>
     </section>
 
-    <!-- About -->
+   
     <section id="about" class="section section__container">
       <h1>About Service</h1>
       <div class="about__majors">
@@ -382,6 +410,16 @@
         </div>
         </div>
       </div>
+   
+     
+      <footer>
+        Library service는 도서관정보나루 API, 국립중앙도서관 OPEN API를 바탕으로 제작됨</br>
+        도서관정보나루API : https://www.data4library.kr/apiUtilization /</br>
+        국립중앙도서관API : https://www.nl.go.kr/NL/contents/N31101030800.do
+      </footer>
+     
+      
+  </section>
     </section>
     <script>
     
