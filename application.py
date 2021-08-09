@@ -14,7 +14,6 @@ from glove import Corpus, Glove
 from konlpy.tag import Okt
 from gensim import models
 from sklearn.model_selection import KFold, train_test_split
-from keras_tuner import BayesianOptimization, HyperModel
 from sklearn.preprocessing import MinMaxScaler
 import xgboost as xgb
 import joblib
@@ -41,7 +40,7 @@ def result():
         additional_info = add_info(l_c)
         y_pred = lc_predict(X)
 
-        return render_template("result.html",result=result)
+        return render_template("result.html",y_pred=y_pred,additional_info=additional_info )
 
 
 
@@ -50,6 +49,7 @@ if __name__ == "__main__":
     lib_final = pd.read_csv('lib_final.csv', dtype = {'code' : 'object'})
     lib_final = lib_final.drop(columns=['name', 'dtl_region'])
     lib_perc_d = pd.read_csv('lib_perc_d.csv', dtype = {'code' : 'object'})
+    #oa_key = '' 자신이 발급받은 국립중앙도서관 Open API 입력
     okt = Okt()
     with open('stopwords_title.txt', encoding = 'UTF-8') as f:
         content = f.readlines()
@@ -146,7 +146,9 @@ if __name__ == "__main__":
             return X
 
     def add_info(lcc):
-        return f'{lib_perc_d.loc[lib_perc_d.code == lcc, "name"].item()}에서 6개월간 대출된 책 중 {round(lib_perc_d.loc[lib_perc_d.code == lcc, "percentage"].item(),1)}%가 1회만 대출됐습니다.'
-    
+        try:
+            return f'{lib_perc_d.loc[lib_perc_d.code == lcc, "name"].item()}에서 6개월간 대출된 책 중 {round(lib_perc_d.loc[lib_perc_d.code == lcc, "percentage"].item(),1)}%가 1회만 대출됐습니다.'
+        except:
+            return ' '    
 
     application.run(host='0.0.0.0')
